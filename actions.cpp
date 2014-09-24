@@ -76,6 +76,68 @@ void moveToFastest(float target[3]) {
     api.setForces(forces);
 }
 
+void moveToVariable(float target[], float power)    //power is a float between 0 and 1 that represents the fraction of the time the engines are running.  
+{
+    if(areWeThereYet)
+    {
+        api.setPositionTarget(target);
+        return;
+    }
+    
+    if(firstTime)          
+    {
+        for(int i = 0; i < 3; i++)  
+        {
+            initPos[i] = currPos[i];
+            halfPos[i] = .5 * power * (target[i] - currPos[i]) + currPos[i];
+        }
+            
+
+        mathVecSubtract(targetVector, target, initPos, 3);  
+        mathVecSubtract(halfwayVector, halfPos, initPos, 3);
+    
+        for(int i = 0; i < 3; i++)
+            forces[i] = targetVector[i];
+        
+        mathVecNormalize(forces, 3);
+        
+        firstTime = false;
+        
+    }
+    else
+    {
+        mathVecSubtract(travelledVector, currPos, initPos, 3);
+        if(mathVecMagnitude(travelledVector, 3) >= mathVecMagnitude(halfwayVector, 3))
+        {
+            if(mathVecMagnitude(travelledVector, 3) <= mathVecMagnitude(targetVector, 3) - mathVecMagnitude(halfwayVector, 3))
+            {
+                for(int i = 0; i < 3; i++)
+                    forces[i] = 0;
+            }
+            
+            else if(fabsf(mathVecMagnitude(travelledVector, 3) - mathVecMagnitude(targetVector, 3)) < 0.1f)
+            {
+                api.setPositionTarget(target);
+                firstTime = true;
+                areWeThereYet = true;
+                
+                DEBUG(("%f", (float)api.getTime()));
+            }
+            
+            else
+            {
+                for(int i = 0; i < 3; i++)
+                    forces[i] = targetVector[i] * -1;
+                
+                mathVecNormalize(forces, 3);
+            }
+        }
+    }
+    api.setForces(forces);
+    
+    
+}
+
 /**
  * If we have the laser:
  *  Return if we've moved to the best lasering position and turned to face the comet
