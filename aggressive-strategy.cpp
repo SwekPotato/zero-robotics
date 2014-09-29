@@ -73,8 +73,6 @@ void init(){
 	}
 }
 
-//state machine logic is fucked up because it doesn't account for the loop to run every second
-//actions will take more than one second
 void loop(){
 
 	if (currentState == TURNED_OFF) {
@@ -85,12 +83,14 @@ void loop(){
 		game.turnOn();
 	}
 
-	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
-		stopAtFastest(outMemoryPackPos);
-	}
-
 	else if (currentState == MOVE_TO_THEIR_MEM_PACK) {
 		stopAtFastest(opponentMemoryPackPos);
+		currentState = TAKING_THEIR_MEM_PACK;
+	}
+
+	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
+		stopAtFastest(outMemoryPackPos);
+		currentState = TAKING_OUR_MEM_PACK;
 	}
 
 	else if (currentState == TAKING_THEIR_MEM_PACK) {
@@ -102,7 +102,7 @@ void loop(){
 	}
 
 	else if (currentState == MOVING_TO_SHADOW) {
-		if (game.getNextFlare() < 15) {
+		if (hasTimeToMoveToShadowZone()) {
 			moveToShadowZone()); 
 		}
 	}
@@ -138,8 +138,9 @@ void loop(){
 	}
 
 	if (currentState == OUT_OF_FUEL) {
-		//TODO: move to shadow
-		game.turnOff();
-		currentState = TURNED_OFF;
+		if (game.getFuelRemaining() < 0.05) {
+			moveToShadowZone();1
+			currentState = TURNED_OFF;
+		}
 	}
 }

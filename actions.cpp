@@ -179,7 +179,7 @@ void moveTowardVariable(float target[], float power) {
     api.setForces(forces);
     
 }
-bool hasTimeToMoveToShawdowZone() {
+bool hasTimeToMoveToShadowZone() {
     
     int timeToNextSolarFlare = game.getNextFlare(); 
     
@@ -194,12 +194,12 @@ bool hasTimeToMoveToShawdowZone() {
 
     float currPos[3] = {ourState[0], ourState[1], ourState[2]};
 
-    /* Shawdow zone positions: 
+    /* Shadow zone positions: 
      * X: 0.0 - 0.64
      * Y: -0.2 - 0.2
      * 
      * Therefore, center at (0.32, 0.0)
-     * When going for shawdow, aim there. 
+     * When going for shadow, aim there. 
      */ 
 
      if (currPos[0] >= 0.0f && currPos[1] <= -0.2f) {
@@ -208,9 +208,9 @@ bool hasTimeToMoveToShawdowZone() {
         //q4
      } else {  //easy /Q1 or Q2
         
-        float timeToGetToShawdow = 2*ourState[1]/ourState[4]; 
+        float timeToGetToShadow = 2*ourState[1]/ourState[4]; 
 
-        return timeToGetToShawdow + 3 > timeToNextSolarFlare; //3 second room for error
+        return timeToGetToShadow + 3 > timeToNextSolarFlare; //3 second room for error
      }
 }
 
@@ -304,22 +304,4 @@ void spinForMemoryPack() {
 
             api.setAttRateTarget(rVel);
         }
-}
-
-/**
- * If we have the laser:
- *  Return if we've moved to the best lasering position and turned to face the comet
- * If we don't have the laser:
- *  Move to the optimal gravity position and move with the comet
- *  Return false always - no shooting
- */
-bool moveToCometPosition() {
-    lookAtComet(laserHeading);
-        
-    return moveTo(optimalShootingPos);
-}
-
-bool runWithComet() {
-    api.setVelocityTarget(joggingSpeed);
-    return game.laserShotsRemaining() <= 0;
 }
