@@ -11,20 +11,34 @@ int 	opponentMemoryPack, ourMemoryPack;
 bool	firstTime, areWeThereYet;
 
 int 	currentState,
-		TURNED_OFF = 0,
-		TURNED_ON = 1,
-		MOVE_TO_OUR_MEM_PACK = 2,
-		MOVE_TO_THEIR_MEM_PACK = 3,
-		TAKING_OUR_MEM_PACK = 4,
-		TAKING_THEIR_MEM_PACK = 5,
-		MOVING_TO_SHADOW = 6,
-		MOVING_TO_FIRST_POI = 7,
-		MOVING_TO_SECOND_POI = 8,
-		TAKING_PIC = 9,
-		UPLOAD_PIC = 10,
-		OUT_OF_FUEL = 11;
+		TURNED_OFF,
+		TURNED_ON,
+		MOVE_TO_OUR_MEM_PACK,
+		MOVE_TO_THEIR_MEM_PACK,
+		TAKING_OUR_MEM_PACK,
+		TAKING_THEIR_MEM_PACK,
+		MOVING_TO_SHADOW,
+		MOVING_TO_FIRST_POI,
+		MOVING_TO_SECOND_POI,
+		TAKING_PIC,
+		UPLOAD_PIC,
+		OUT_OF_FUEL;
 
 void init(){
+
+	TURNED_OFF = 0,
+	TURNED_ON = 1,
+	MOVE_TO_OUR_MEM_PACK = 2,
+	MOVE_TO_THEIR_MEM_PACK = 3,
+	TAKING_OUR_MEM_PACK = 4,
+	TAKING_THEIR_MEM_PACK = 5,
+	MOVING_TO_SHADOW = 6,
+	MOVING_TO_FIRST_POI = 7,
+	MOVING_TO_SECOND_POI = 8,
+	TAKING_PIC = 9,
+	UPLOAD_PIC = 10,
+	OUT_OF_FUEL = 11;
+
 	firstTime = true;
 	areWeThereYet = false;
 	
@@ -59,6 +73,8 @@ void init(){
 	}
 }
 
+//state machine logic is fucked up because it doesn't account for the loop to run every second
+//actions will take more than one second
 void loop(){
 
 	if (currentState == TURNED_OFF) {
@@ -70,24 +86,24 @@ void loop(){
 	}
 
 	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
-		stopAtFastest([ -0.5, -0.6, 0,0]);
+		stopAtFastest(outMemoryPackPos);
 	}
 
 	else if (currentState == MOVE_TO_THEIR_MEM_PACK) {
-		stopAtFastest([ -0.5, 0.6, 0,0]);
+		stopAtFastest(opponentMemoryPackPos);
 	}
 
 	else if (currentState == TAKING_THEIR_MEM_PACK) {
-		spin();
+		spinForMemoryPack();
 	}
 
 	else if (currentState == TAKING_OUR_MEM_PACK) {
-		spin();
+		spinForMemoryPack();	
 	}
 
 	else if (currentState == MOVING_TO_SHADOW) {
 		if (game.getNextFlare() < 15) {
-			//TODO: patrick's code
+			moveToShadowZone()); 
 		}
 	}
 
