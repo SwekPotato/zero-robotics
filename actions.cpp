@@ -259,49 +259,23 @@ firstTimeSpinningForMemPack = false;
  * Rotate the satellite >90° along about the Z axis for 2D. 
  * Do not attempt to rotate faster than 80°/s
  */
-void spinForMemoryPack() {
-    //SPIN ALONG Z_AXIS
+void spinForMemoryPack(float[3] memoryPackPos) {
 
-    //update this
     api.getMyZRState(ourState); 
+    zRVel = ourState[11]; 
 
-    float currXRotation = ourState[9];
-    float currYRotation = ourState[10]; 
-    float currZRotation = ourState[11];
+    float[] currPos = {ourState[0], ourState[1], ourState[2]};
 
-    float zTarget; 
+    float distToMemPack = dist(memoryPackPos, currPos);
 
-    //THIS IS ALL CURRENTLY IN DEGREES, WHICH IS PROBABLY WRONG. 
-    if (firstTimeSpinningForMemPack) {
-
-        firstTimeSpinningForMemPack = false; 
-
-        if (abs(currZRotation) >= 2.3) {
-
-            float rVel[3] = {currXRotation, currYRotation, 0};
-
-            api.setAttRateTarget(rVel); 
-            return; 
+        if (!(zRVel < 1.4f) && zRVel > 0.04f && distToMemPack < 0.05f){
+        float rVel[3] = {0f, 0f, 1f}; //in radians
+        api.setAttRateTarget(rVel);
         }
-    } else {
-        if (abs(currZRotation) >= 80) {
-                
-                float rVel[3] = {currXRotation, currYRotation, 0};
-
-                api.setAttRateTarget(rVel); 
-                return; 
-            }
-        /* nothing should be wrong at this point, time to start spinning
-         * need to spin 90 degrees, restricted at 80 degreees / second
-         * meaning this is going to take at least 2 loops, should aim for 40 degrees per second
-         */
-         if (currZRotation > 0 && abs(currZRotation - 40) > 10)
-            return; 
-
-            zTarget = 50 * PI/180; //spin at 50 degrees/second
-
-            float rVel[3] = {currXRotation, currYRotation, zTarget};
-
-            api.setAttRateTarget(rVel);
+        else {    
+        setPositionTarget(memoryPackPos); 
+        float rVel[3] = {0f, 0f, 0f};
+        setAttRateTarget(rVel); 
         }
+}
 }
