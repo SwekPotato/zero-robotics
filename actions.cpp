@@ -1,45 +1,8 @@
-/**
- * Move to the first laser position, turn to get laser,
- * move the the second laser position, turn to get laser,
- * return if completed
-*/
-bool getLaser1() {
-	if (otherState[1] > myState[1] && myState[1] > 0 && (myState[0] > 0) == (otherState[0] > 0)) ohCrap = true;
-	
-	if (moveTo(laserCoords)) { 
-		if (!game.haveItem(0, isSPH1 ? 0 : 1)) // 0, 0 for blue
-			api.setAttRateTarget(turnSpeed);
-	}
-	
-	//DEBUG(("has laser? %i", game.haveItem(0, isSPH1 ? 0 : 1)));
-	
-	return api.getTime() > 40 || game.haveItem(0, isSPH1 ? 1 : 0) || ohCrap;
-
-				// their y is greater then ours
-				// our y is greater then 0
-}
-
-bool getLaser2() {
-	laserCoords[0] = isSPH1 ? 0.5f : -0.5f;
-	turnSpeed[2] = 0.5f;
-	
-	if (!moveTo(laserCoords)) {
-		api.setAttRateTarget(zeroArray);
-	} else {
-		api.setAttRateTarget(turnSpeed);
-	}
-		
-	DEBUG(("h2=%i;", game.haveItem(0, isSPH1 ? 0 : 1)));
-
-	return api.getTime() > 85 || game.haveItem(0, isSPH1 ? 0 : 1);
-}
-
 /*
  * Moves the satellite to a provided target location, with
  * thrusters firing at full power the enitre trip. Stops the
  * satellite at the target.
 */
-
 void stopAtFastest(float target[3]) {
     if(areWeThereYet) {
         api.setPositionTarget(target);
@@ -92,7 +55,7 @@ void stopAtFastest(float target[3]) {
  * equivalent to calling stopAtFastest() and 0 resulting in
  * no movement.
 */
-void stopAtVariable {
+void stopAtVariable (float target[3], float power) {
     if(areWeThereYet) {
         api.setPositionTarget(target);
         return;
@@ -148,7 +111,6 @@ void stopAtVariable {
  * thrusters firing at full power the entire trip. Makes
  * no attempt to stop at the target.
 */
-
 void moveTowardFastest(float target[3]) {
     if(areWeThereYet)
         return;
@@ -217,7 +179,6 @@ void moveTowardVariable(float target[], float power) {
     api.setForces(forces);
     
 }
-
 bool hasTimeToMoveToShawdowZone() {
     
     int timeToNextSolarFlare = game.getNextFlare(); 
@@ -254,6 +215,7 @@ bool hasTimeToMoveToShawdowZone() {
         return timeToGetToShawdow + 3 > timeToNextSolarFlare; //3 second room for error
      }
 }
+
 void moveToShadowZone() {
 
     //update this
@@ -299,12 +261,12 @@ void moveToWaypoints(float wayPoints[][3], float finalDest[]) {
  *  Return false always - no shooting
  */
 bool moveToCometPosition() {
-	lookAtComet(laserHeading);
-		
-	return moveTo(optimalShootingPos);
+    lookAtComet(laserHeading);
+        
+    return moveTo(optimalShootingPos);
 }
 
 bool runWithComet() {
-	api.setVelocityTarget(joggingSpeed);
-	return game.laserShotsRemaining() <= 0;
+    api.setVelocityTarget(joggingSpeed);
+    return game.laserShotsRemaining() <= 0;
 }

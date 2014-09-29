@@ -1,25 +1,28 @@
-float target;
-float myPos[3], desiredVel[3];
-float velocityScalar[3];
-bool    firstTime;
-bool    areWeThereYet;
+float	target, alpha;
+float	myPos[3], desiredVel[3], velocityScalar[3];
+float	ourMemoryPackPos[3], opponentMemoryPackPos[3];
+float   myVel[3], forces[3], initPos[3], halfPos[3];
+float   travelledVector[3], halfwayVector[3], targetVector[3];
 float   currPos[3];
-float ourState[12];
-float othersState[12]; 
-float ourMemoryPackPos[3];
-float opponentMemoryPackPos[3];
-int opponentMemoryPack; 
-int ourMemoryPack; 
-float alpha; 
-float   myVel[3];
-float   myState[12];
-float   forces[3];              //the forces to be applied to this call of the function
-float   initPos[3];             //the position of the sphere in the first call of the fn
-float   halfPos[3];             //the position halfway between initpos and the destination
-float   travelledVector[3];     //the vector from initpos to the sphere this call of the fn
-float   halfwayVector[3];       //the vector from initpos to halfpos
-float   targetVector[3];        //the vector from initpos to the destination
+float	ourState[12], othersState[12]; 
 float   zeroVelocity[3];
+float	firstPOI[3], secondPOI[3];
+int 	opponentMemoryPack, ourMemoryPack; 
+bool	firstTime, areWeThereYet;
+
+int 	currentState,
+		TURNED_OFF = 0,
+		TURNED_ON = 1,
+		MOVE_TO_OUR_MEM_PACK = 2,
+		MOVE_TO_THEIR_MEM_PACK = 3,
+		TAKING_OUR_MEM_PACK = 4,
+		TAKING_THEIR_MEM_PACK = 5,
+		MOVING_TO_SHADOW = 6,
+		MOVING_TO_FIRST_POI = 7,
+		MOVING_TO_SECOND_POI = 8,
+		TAKING_PIC = 9,
+		UPLOAD_PIC = 10,
+		OUT_OF_FUEL = 11;
 
 void init(){
 	firstTime = true;
@@ -31,7 +34,7 @@ void init(){
             halfPos[i] = 0.0f;
             currPos[i] = 0.0f;
         }
-        myState[i] = 0.0f;
+        ourState[i] = 0.0f;
     }
     	alpha = 0.343834f; //radians, degrees = 19.70029402 degrees
 	api.getMyZRState(ourState); 
@@ -57,24 +60,70 @@ void init(){
 }
 
 void loop(){
-    
-	//This function is called once per second.  Use it to control the satellite.
 
-    //Get other Memory pack if other team not trying too
-    game.getPOILoc(float pos[3], int id)
-
-
-    //Take 2  or 3 pics of POI
-    game.takePic(float zrState[12], float poiPos[3])
-
-	//Upload pics while moving to get enemy memory
-	game.uploadPic()
-
-	//Go grab our own memory pack 
-
-	//Flare detection
-	if (game.getNextFlare() < 15) {
-		// Movement code to shadow
+	if (currentState == TURNED_OFF) {
+		game.turnOff();
+	}
+	
+	else if (currentState == TURNED_ON) {
+		game.turnOn();
 	}
 
+	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
+		stopAtFastest([ -0.5, -0.6, 0,0]);
+	}
+
+	else if (currentState == MOVE_TO_THEIR_MEM_PACK) {
+		stopAtFastest([ -0.5, 0.6, 0,0]);
+	}
+
+	else if (currentState == TAKING_THEIR_MEM_PACK) {
+		spin();
+	}
+
+	else if (currentState == TAKING_OUR_MEM_PACK) {
+		spin();
+	}
+
+	else if (currentState == MOVING_TO_SHADOW) {
+		if (game.getNextFlare() < 15) {
+			//TODO: patrick's code
+		}
+	}
+
+	else if (currentState == MOVING_TO_FIRST_POI) {
+		firstPOI = game.getPOILoc(pos[3], 0);
+		stopAtFastest(firstPOI[3]);
+		currentState = TAKING_PIC;
+	}
+
+	else if (currentState == MOVING_TO_SECOND_POI) {
+		secondPOI = game.getPOILoc(pos[3], 1);
+		stopAtFastest(firstPOI[3]);
+		currentState = TAKING_PIC;
+	}
+
+	else if (currentState == TAKING_PIC) {
+
+		lookAtPOIFromOuter(); //TODO: write this method
+
+		if (game.alignLine(0)) {
+			game.takePic(0);
+		} 
+
+		lookAtPOIFromInner(); ////TODO: write this method
+
+	}
+
+	if (currentState == UPLOAD_PIC) {
+		if (game.getMemorySize() ==  game.getMemoryFilled()) {
+			game.uploadPic(); //SPEHERE now disabled for 3secs
+		}
+	}
+
+	if (currentState == OUT_OF_FUEL) {
+		//TODO: move to shadow
+		game.turnOff();
+		currentState = TURNED_OFF;
+	}
 }
