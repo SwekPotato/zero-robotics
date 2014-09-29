@@ -204,11 +204,9 @@ bool hasTimeToMoveToShawdowZone() {
 
      if (currPos[0] >= 0.0f && currPos[1] <= -0.2f) {
         //q3
-     }
-     else if (currPos[0] >= 0.0f && currPos[1] >= 0.2f) {
+     } else if (currPos[0] >= 0.0f && currPos[1] >= 0.2f) {
         //q4
-     }
-     else {  //easy /Q1 or Q2
+     } else {  //easy /Q1 or Q2
         
         float timeToGetToShawdow = 2*ourState[1]/ourState[4]; 
 
@@ -232,8 +230,7 @@ void moveToShadowZone() {
         
         moveToWaypoints(waypointArray, shadowCenter); 
 
-     }
-     else if (ourState[0] >= 0.0f && ourState[1] >= 0.2f) {
+     } else if (ourState[0] >= 0.0f && ourState[1] >= 0.2f) {
 
        float waypoint[] = {0.0f,0.4,0.0f}; 
 
@@ -243,14 +240,64 @@ void moveToShadowZone() {
         waypointArray[0][2] = waypoint[2];
         
         moveToWaypoints(waypointArray, shadowCenter); 
-     }
-     else {  //easy /Q1 or Q2
+     } else {  //easy /Q1 or Q2
         moveToFastest(shadowCenter);
      }
 }
 
 void moveToWaypoints(float wayPoints[][3], float finalDest[]) {
     //TODO david
+}
+
+bool firstTimeSpinningForMemPack; 
+
+//somewhere in init
+firstTimeSpinningForMemPack = false; 
+
+/*
+ * The satellite’s angular velocity must start at less than 2.3°/s.
+ * Rotate the satellite >90° along about the Z axis for 2D. 
+ * Do not attempt to rotate faster than 80°/s
+ */
+void spinForMemoryPack() {
+    //SPIN ALONG Z_AXIS
+
+    //update this
+    api.getMyZRState(ourState); 
+
+    float currXRotation = ourState[9];
+    float currYRotation = ourState[10]; 
+    float currZRotation = ourState[11];
+
+    float zTarget; 
+
+    //THIS IS ALL CURRENTLY IN DEGREES, WHICH IS PROBABLY WRONG. 
+    if (firstTimeSpinningForMemPack) {
+
+        firstTimeSpinningForMemPack = false; 
+
+        if (abs(currZRotation) >= 2.3) {
+        //fix that, then continue on
+            return; 
+        }
+    } else {
+        if (abs(currZRotation) >= 80) {
+                //slowww that down, then continue on
+                return; 
+            }
+        /* nothing should be wrong at this point, time to start spinning
+         * need to spin 90 degrees, restricted at 80 degreees / second
+         * meaning this is going to take at least 2 loops, should aim for 40 degrees per second
+         */
+         if (currZRotation > 0 && abs(currZRotation - 40) > 10)
+            return; 
+
+            zTarget = 50 * PI/180; //spin at 50 degrees/second
+
+            float rVel[3] = {currXRotation, currYRotation, zTarget};
+
+            api.setAttRateTarget(rVel);
+        }
 }
 
 /**
