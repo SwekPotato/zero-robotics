@@ -218,6 +218,79 @@ void moveTowardVariable(float target[], float power) {
     
 }
 
+bool hasTimeToMoveToShawdowZone() {
+    
+    int timeToNextSolarFlare = game.getNextFlare(); 
+    
+    if (timeToNextSolarFlare == -1)
+        return false; 
+    
+    if (game.getMemoryFilled() == 0)
+        return false; //should just turn off
+    
+    //make sure this is up to date
+    api.getMyZRState(ourState); 
+
+    float currPos[3] = {ourState[0], ourState[1], ourState[2]};
+
+    /* Shawdow zone positions: 
+     * X: 0.0 - 0.64
+     * Y: -0.2 - 0.2
+     * 
+     * Therefore, center at (0.32, 0.0)
+     * When going for shawdow, aim there. 
+     */ 
+
+     if (currPos[0] >= 0.0f && currPos[1] <= -0.2f) {
+        //q3
+     }
+     else if (currPos[0] >= 0.0f && currPos[1] >= 0.2f) {
+        //q4
+     }
+     else {  //easy /Q1 or Q2
+        
+        float timeToGetToShawdow = 2*ourState[1]/ourState[4]; 
+
+        return timeToGetToShawdow + 3 > timeToNextSolarFlare; //3 second room for error
+     }
+}
+void moveToShadowZone() {
+
+    //update this
+    api.getMyZRState(ourState); 
+
+    if (ourState[0] >= 0.0f && ourState[1] <= -0.2f) {
+        
+        float waypoint[] = {0.0f,-0.4,0.0f}; 
+
+        float waypointArray[1][3];
+        waypointArray[0][0] = waypoint[0];
+        waypointArray[0][1] = waypoint[1];
+        waypointArray[0][2] = waypoint[2];
+        
+        moveToWaypoints(waypointArray, shadowCenter); 
+
+     }
+     else if (ourState[0] >= 0.0f && ourState[1] >= 0.2f) {
+
+       float waypoint[] = {0.0f,0.4,0.0f}; 
+
+        float waypointArray[1][3];
+        waypointArray[0][0] = waypoint[0];
+        waypointArray[0][1] = waypoint[1];
+        waypointArray[0][2] = waypoint[2];
+        
+        moveToWaypoints(waypointArray, shadowCenter); 
+     }
+     else {  //easy /Q1 or Q2
+        moveToFastest(shadowCenter);
+     }
+}
+
+void moveToWaypoints(float wayPoints[][3], float finalDest[]) {
+    //TODO david
+}
+
 /**
  * If we have the laser:
  *  Return if we've moved to the best lasering position and turned to face the comet
