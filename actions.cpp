@@ -277,12 +277,18 @@ void spinForMemoryPack() {
         firstTimeSpinningForMemPack = false; 
 
         if (abs(currZRotation) >= 2.3) {
-        //fix that, then continue on
+
+            float rVel[3] = {currXRotation, currYRotation, 0};
+
+            api.setAttRateTarget(rVel); 
             return; 
         }
     } else {
         if (abs(currZRotation) >= 80) {
-                //slowww that down, then continue on
+                
+                float rVel[3] = {currXRotation, currYRotation, 0};
+
+                api.setAttRateTarget(rVel); 
                 return; 
             }
         /* nothing should be wrong at this point, time to start spinning
