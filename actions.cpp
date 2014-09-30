@@ -67,7 +67,6 @@ void stopAtVariable (float target[3], float power) {
             halfPos[i] = .5 * power * (target[i] - currPos[i]) + currPos[i];
         }
             
-
         mathVecSubtract(targetVector, target, initPos, 3);  
         mathVecSubtract(halfwayVector, halfPos, initPos, 3);
     
@@ -192,7 +191,10 @@ bool hasTimeToMoveToShadowZone() {
     //make sure this is up to date
     api.getMyZRState(ourState); 
 
-    float currPos[3] = {ourState[0], ourState[1], ourState[2]};
+    float currPos[3];
+    currPos[0] = ourState[0];
+    currPos[1] = ourState[1];
+    currPos[2] = ourState[2];
 
     /* Shadow zone positions: 
      * X: 0.0 - 0.64
@@ -221,7 +223,10 @@ void moveToShadowZone() {
 
     if (ourState[0] >= 0.0f && ourState[1] <= -0.2f) {
         
-        float waypoint[] = {0.0f,-0.4,0.0f}; 
+        float waypoint[3];
+        waypoint[0] = 0.0f;
+        waypoint[1] = -0.4f;
+        waypoint[2] = 0.0f;  
 
         float waypointArray[1][3];
         waypointArray[0][0] = waypoint[0];
@@ -249,11 +254,6 @@ void moveToWaypoints(float wayPoints[][3], float finalDest[]) {
     //TODO david
 }
 
-bool firstTimeSpinningForMemPack; 
-
-//somewhere in init
-firstTimeSpinningForMemPack = false; 
-
 /*
  * The satellite’s angular velocity must start at less than 2.3°/s.
  * Rotate the satellite >90° along about the Z axis for 2D. 
@@ -264,8 +264,11 @@ void spinForMemoryPack(float[3] memoryPackPos) {
     api.getMyZRState(ourState); 
     zRVel = ourState[11]; 
 
-    float currPos[] = {ourState[0], ourState[1], ourState[2]};
-
+    float currPos[3];
+    currPos[0] = ourState[0];
+    currPos[1] = ourState[1];
+    currPos[2] = ourState[2];
+    
     float distToMemPack = dist(memoryPackPos, currPos);
 
         if (!(zRVel < 1.4f) && zRVel > 0.04f && distToMemPack < 0.05f){
@@ -303,7 +306,10 @@ void lookAtPOIFromZone(int zoneID) {
 
     api.setPositionTarget(lookingPosition); 
 
-    float noRotation = {0.0f, 0.0f, 0.0f}; 
+    float noRotation[3];
+    noRotation[0] = 0.0f;
+    noRotation[1] = 0.0f; 
+    noRotation[2] = 0.0f; 
 
     api.setAttRateTarget(noRotation); 
 

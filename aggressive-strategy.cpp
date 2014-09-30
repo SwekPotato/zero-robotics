@@ -84,13 +84,6 @@ void init() {
 	}
 }
 
-<<<<<<< HEAD
-
-//state machine logic is fucked up because it doesn't account for the loop to run every second
-//actions will take more than one second
-
-=======
->>>>>>> FETCH_HEAD
 void loop() {
 
 	if (game.getFuelRemaining() < .1) {
@@ -103,13 +96,10 @@ void loop() {
 
 	if (currentState == TURNED_OFF) {
 		game.turnOff();
-<<<<<<< HEAD
 		
 		if (getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
 				currentState = TURNED_ON;
 			}
-=======
->>>>>>> FETCH_HEAD
 
 		if (getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
 			currentState = TURNED_ON;
@@ -124,7 +114,6 @@ void loop() {
 	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
 		stopAtFastest(ourMemoryPackPos);
 
-<<<<<<< HEAD
 		//are we there yet? 
 		if (dist(ourMemoryPackPos, currPos) < .1)
 			doneWithCurrTask = true;
@@ -136,8 +125,6 @@ void loop() {
 		if (game.hasMemoryPack(0, ourMemoryPack) || game.hasMemoryPack(1, ourMemoryPack)) //doesn't matter who has it, if its gone stop going for it
 			doneWithCurrTask = true; 
 
-=======
->>>>>>> FETCH_HEAD
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
@@ -146,27 +133,20 @@ void loop() {
 	else if (currentState == MOVE_TO_THEIR_MEM_PACK) {
 		stopAtFastest(opponentMemoryPackPos);
 
-<<<<<<< HEAD
 		if (dist(opponentMemoryPackPos, currPos) < .1)
 			doneWithCurrTask = true;
 
-=======
->>>>>>> FETCH_HEAD
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
 
 	else if (currentState == TAKING_THEIR_MEM_PACK) {
-
 		spinForMemoryPack();
 
-<<<<<<< HEAD
 		if (game.hasMemoryPack(0, opponentMemoryPack) || game.hasMemoryPack(1, opponentMemoryPack)) 
 			doneWithCurrTask = true; 
 
-=======
->>>>>>> FETCH_HEAD
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
@@ -186,14 +166,10 @@ void loop() {
 		if (game.getNextFlare == -1)
 			doneWithCurrTask = true; 
 		}
-<<<<<<< HEAD
-=======
-
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
->>>>>>> FETCH_HEAD
 
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
@@ -242,12 +218,10 @@ void loop() {
 	}
 
 	if (currentState == OUT_OF_FUEL) {
-<<<<<<< HEAD
 		stopAtVariable(shadowCenter, .3); 
 		if (game.getFuelRemaining() == 0) {
 			game.turnOff();
-=======
->>>>>>> FETCH_HEAD
+
 		if (getFuelRemaining() < 0.01) {
 			moveToShadowZone();
 			currentState = TURNED_OFF;
