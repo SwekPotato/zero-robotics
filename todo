@@ -1,13 +1,5 @@
 //TODO: 
 
-- for currentState == TURNED_OFF:
-	- we can’t just turn off and stay turned off forever. 
-- logic for when to switch to the next state
-	- ACTIONS TAKE MORE THAN A SECOND - closed loop vs open loop function calls
-	- cycling? 
-
 - David finish up waypoint code
-
-- instead of turning off when out of full, maybe head for the shadow zone when right before running out of fuel
 
 - finish, test, submit before 1:59 pm tomorrow. 
