@@ -1,23 +1,29 @@
 /*
- * Moves the satellite to a provided target location, with
- * thrusters firing at full power the enitre trip. Stops the
- * satellite at the target.
+* Moves the satellite to a provided target location, with
+* thrusters firing at full power the enitre trip. Stops the
+* satellite at the target.
 */
-void stopAtFastest(float target[]) {
-    if(areWeThereYet) {
+
+void stopAtFastest(float target[3])
+{
+    if(areWeThereYet)
+    {
         api.setPositionTarget(target);
         return;
     }
         
-    if(firstTime) {
-        for(int i = 0; i < 3; i++)  {
+    if(firstTime)               //IS IT THE FIRST TIME YOU CALLED THE FUNCTION?
+    {
+        for(int i = 0; i < 3; i++)  //if it is, sets initPos to the position and halfPos to the halfway point of the sphere
+        {
             initPos[i] = currPos[i];
+            initVel[i] = currVel[i];
             halfPos[i] = (target[i] - currPos[i])/2 + currPos[i];
         }
             
 
-        mathVecSubtract(targetVector, target, initPos, 3);
-        mathVecSubtract(halfwayVector, halfPos, initPos, 3);
+        mathVecSubtract(targetVector, target, initPos, 3);  //subtracts initpos from the destination to get the vector from initpos to the destination
+        mathVecSubtract(halfwayVector, halfPos, initPos, 3);//   ''       ''     ''  halfpos         ''  ''  ''   ''     ''   ''    '' halfpos
     
         for(int i = 0; i < 3; i++)
             forces[i] = targetVector[i];
@@ -26,16 +32,22 @@ void stopAtFastest(float target[]) {
         
         firstTime = false;
         
-    } else {
-        mathVecSubtract(travelledVector, currPos, initPos, 3);
-        if(mathVecMagnitude(travelledVector, 3) >= mathVecMagnitude(halfwayVector, 3)) {
-            if(fabsf(mathVecMagnitude(travelledVector, 3) - mathVecMagnitude(targetVector, 3)) < 0.1f) {
+    }
+    else    //DO THIS IF THIS IS *NOT* THE FIRST TIME YOU CALLED THE FUNCTION
+    {
+        mathVecSubtract(travelledVector, currPos, initPos, 3);    //subtracts initpos from current pos to get the vector from initpos to current pos
+        if(mathVecMagnitude(travelledVector, 3) >= mathVecMagnitude(halfwayVector, 3))
+        {
+            if(fabsf(mathVecMagnitude(travelledVector, 3) - mathVecMagnitude(targetVector, 3)) < 0.1f)
+            {
                 api.setPositionTarget(target);
                 firstTime = true;
                 areWeThereYet = true;
                 
                 DEBUG(("%f", (float)api.getTime()));
-            } else {
+            }
+            else
+            {
                 for(int i = 0; i < 3; i++)
                     forces[i] = targetVector[i] * -1;
                 
@@ -44,63 +56,7 @@ void stopAtFastest(float target[]) {
         }
     }
     api.setForces(forces);
-}
-
-/*
- * Moves the satellite to a provided target location, with
- * thrusters firing only the percentage of the trip specified
- * by the power variable. Stops the satellite at the target.
- * Power should be a decimal between 0 and 1, with 1 being 
- * equivalent to calling stopAtFastest() and 0 resulting in
- * no movement.
-*/
-void stopAtVariable (float target[], float power) {
-    if(areWeThereYet) {
-        api.setPositionTarget(target);
-        return;
-    }
     
-    if(firstTime) {
-        for(int i = 0; i < 3; i++) {
-            initPos[i] = currPos[i];
-            halfPos[i] = .5 * power * (target[i] - currPos[i]) + currPos[i];
-        }
-            
-        mathVecSubtract(targetVector, target, initPos, 3);  
-        mathVecSubtract(halfwayVector, halfPos, initPos, 3);
-    
-        for(int i = 0; i < 3; i++)
-            forces[i] = targetVector[i];
-        
-        mathVecNormalize(forces, 3);
-        
-        firstTime = false;
-        
-    } else {
-        mathVecSubtract(travelledVector, currPos, initPos, 3);
-        if(mathVecMagnitude(travelledVector, 3) >= mathVecMagnitude(halfwayVector, 3)) {
-            if(mathVecMagnitude(travelledVector, 3) <= mathVecMagnitude(targetVector, 3) - mathVecMagnitude(halfwayVector, 3)) {
-                for(int i = 0; i < 3; i++)
-                    forces[i] = 0;
-            }
-            
-            else if(fabsf(mathVecMagnitude(travelledVector, 3) - mathVecMagnitude(targetVector, 3)) < 0.1f) {
-                api.setPositionTarget(target);
-                firstTime = true;
-                areWeThereYet = true;
-                
-                DEBUG(("%f", (float)api.getTime()));
-            }
-            
-            else {
-                for(int i = 0; i < 3; i++)
-                    forces[i] = targetVector[i] * -1;
-                
-                mathVecNormalize(forces, 3);
-            }
-        }
-    }
-    api.setForces(forces);
 }
 
 
