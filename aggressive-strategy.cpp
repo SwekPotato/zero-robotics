@@ -80,12 +80,14 @@ void init() {
 	}
 }
 
-//state machine logic is fucked up because it doesn't account for the loop to run every second
-//actions will take more than one second
 void loop() {
 
 	if (currentState == TURNED_OFF) {
 		game.turnOff();
+
+		if (getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
+			currentState = TURNED_ON;
+		}
 	}
 	
 	else if (currentState == TURNED_ON) {
@@ -94,23 +96,43 @@ void loop() {
 
 	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
 		stopAtFastest(ourMemoryPackPos);
+
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
+		}
 	}
 
 	else if (currentState == MOVE_TO_THEIR_MEM_PACK) {
 		stopAtFastest(opponentMemoryPackPos);
+
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
+		}
 	}
 
 	else if (currentState == TAKING_THEIR_MEM_PACK) {
 		spinForMemoryPack();
+
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
+		}
 	}
 
 	else if (currentState == TAKING_OUR_MEM_PACK) {
-		spinForMemoryPack();	
+		spinForMemoryPack();
+
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
+		}	
 	}
 
 	else if (currentState == MOVING_TO_SHADOW) {
 		if (game.getNextFlare() < 15) {
 			moveToShadowZone(); 
+		}
+
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
 		}
 	}
 
@@ -118,12 +140,20 @@ void loop() {
 		firstPOI = game.getPOILoc(pos[3], 0);
 		stopAtFastest(firstPOI[3]);
 		currentState = TAKING_PIC;
+
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
+		}
 	}
 
 	else if (currentState == MOVING_TO_SECOND_POI) {
 		secondPOI = game.getPOILoc(pos[3], 1);
 		stopAtFastest(firstPOI[3]);
 		currentState = TAKING_PIC;
+
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
+		}
 	}
 
 	else if (currentState == TAKING_PIC) {
@@ -134,7 +164,11 @@ void loop() {
 			game.takePic(0);
 		} 
 
-		lookAtPOIFromZone(INNER_ZONE_ID); 
+		lookAtPOIFromZone(INNER_ZONE_ID);
+
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
+		}
 
 	}
 
@@ -145,8 +179,9 @@ void loop() {
 	}
 
 	if (currentState == OUT_OF_FUEL) {
-		//TODO: move to shadow
-		game.turnOff();
-		currentState = TURNED_OFF;
+		if (getFuelRemaining() < 0.01) {
+			moveToShadowZone();
+			currentState = TURNED_OFF;
+		}
 	}
 }
