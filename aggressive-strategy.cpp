@@ -11,6 +11,8 @@ int 	opponentMemoryPack, ourMemoryPack;
 bool	firstTime, areWeThereYet;
 
 
+bool doneWithCurrTask; 
+
 int INNER_ZONE_ID,
     OUTER_ZONE_ID;
 
@@ -30,11 +32,13 @@ int 	currentState,
 
 void init() {
 
+	doneWithCurrTask = false; 
+
 	TURNED_OFF = 0,
 	TURNED_ON = 1,
 	MOVE_TO_OUR_MEM_PACK = 2,
-	MOVE_TO_THEIR_MEM_PACK = 3,
-	TAKING_OUR_MEM_PACK = 4,
+	TAKING_OUR_MEM_PACK = 3,
+	MOVE_TO_THEIR_MEM_PACK = 4,
 	TAKING_THEIR_MEM_PACK = 5,
 	MOVING_TO_SHADOW = 6,
 	MOVING_TO_FIRST_POI = 7,
@@ -80,10 +84,32 @@ void init() {
 	}
 }
 
+<<<<<<< HEAD
+
+//state machine logic is fucked up because it doesn't account for the loop to run every second
+//actions will take more than one second
+
+=======
+>>>>>>> FETCH_HEAD
 void loop() {
+
+	if (game.getFuelRemaining() < .1) {
+		currentState = OUT_OF_FUEL; 
+	}
+	if (doneWithCurrTask) {
+		currentState++; 
+		doneWithCurrTask = false; 
+	}
 
 	if (currentState == TURNED_OFF) {
 		game.turnOff();
+<<<<<<< HEAD
+		
+		if (getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
+				currentState = TURNED_ON;
+			}
+=======
+>>>>>>> FETCH_HEAD
 
 		if (getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
 			currentState = TURNED_ON;
@@ -92,11 +118,26 @@ void loop() {
 	
 	else if (currentState == TURNED_ON) {
 		game.turnOn();
+		currentState++; 
 	}
 
 	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
 		stopAtFastest(ourMemoryPackPos);
 
+<<<<<<< HEAD
+		//are we there yet? 
+		if (dist(ourMemoryPackPos, currPos) < .1)
+			doneWithCurrTask = true;
+	}
+
+	else if (currentState == TAKING_OUR_MEM_PACK) {
+		spinForMemoryPack();
+
+		if (game.hasMemoryPack(0, ourMemoryPack) || game.hasMemoryPack(1, ourMemoryPack)) //doesn't matter who has it, if its gone stop going for it
+			doneWithCurrTask = true; 
+
+=======
+>>>>>>> FETCH_HEAD
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
@@ -105,14 +146,27 @@ void loop() {
 	else if (currentState == MOVE_TO_THEIR_MEM_PACK) {
 		stopAtFastest(opponentMemoryPackPos);
 
+<<<<<<< HEAD
+		if (dist(opponentMemoryPackPos, currPos) < .1)
+			doneWithCurrTask = true;
+
+=======
+>>>>>>> FETCH_HEAD
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
 
 	else if (currentState == TAKING_THEIR_MEM_PACK) {
+
 		spinForMemoryPack();
 
+<<<<<<< HEAD
+		if (game.hasMemoryPack(0, opponentMemoryPack) || game.hasMemoryPack(1, opponentMemoryPack)) 
+			doneWithCurrTask = true; 
+
+=======
+>>>>>>> FETCH_HEAD
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
@@ -129,13 +183,22 @@ void loop() {
 	else if (currentState == MOVING_TO_SHADOW) {
 		if (game.getNextFlare() < 15) {
 			moveToShadowZone(); 
+		if (game.getNextFlare == -1)
+			doneWithCurrTask = true; 
 		}
+<<<<<<< HEAD
+=======
 
 		if (getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
+>>>>>>> FETCH_HEAD
 
+		if (getFuelRemaining() < 0.01) {
+			currentState = OUT_OF_FUEL;
+		}
+	}
 	else if (currentState == MOVING_TO_FIRST_POI) {
 		firstPOI = game.getPOILoc(pos[3], 0);
 		stopAtFastest(firstPOI[3]);
@@ -179,6 +242,12 @@ void loop() {
 	}
 
 	if (currentState == OUT_OF_FUEL) {
+<<<<<<< HEAD
+		stopAtVariable(shadowCenter, .3); 
+		if (game.getFuelRemaining() == 0) {
+			game.turnOff();
+=======
+>>>>>>> FETCH_HEAD
 		if (getFuelRemaining() < 0.01) {
 			moveToShadowZone();
 			currentState = TURNED_OFF;
