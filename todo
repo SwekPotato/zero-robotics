@@ -10,7 +10,4 @@
 
 - instead of turning off when out of full, maybe head for the shadow zone when right before running out of fuel
 
-- write lookAtPOIFromOuter() and lookAtPOIFromInner() action functions
-
-
 - finish, test, submit before 1:59 pm tomorrow. 

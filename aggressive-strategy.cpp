@@ -10,6 +10,10 @@ float	firstPOI[3], secondPOI[3];
 int 	opponentMemoryPack, ourMemoryPack; 
 bool	firstTime, areWeThereYet;
 
+
+int INNER_ZONE_ID,
+    OUTER_ZONE_ID;
+
 int 	currentState,
 		TURNED_OFF,
 		TURNED_ON,
@@ -24,7 +28,7 @@ int 	currentState,
 		UPLOAD_PIC,
 		OUT_OF_FUEL;
 
-void init(){
+void init() {
 
 	TURNED_OFF = 0,
 	TURNED_ON = 1,
@@ -38,6 +42,9 @@ void init(){
 	TAKING_PIC = 9,
 	UPLOAD_PIC = 10,
 	OUT_OF_FUEL = 11;
+
+    INNER_ZONE_ID = 0, 
+    OUTER_ZONE_ID = 1; 
 
 	firstTime = true;
 	areWeThereYet = false;
@@ -73,7 +80,9 @@ void init(){
 	}
 }
 
-void loop(){
+//state machine logic is fucked up because it doesn't account for the loop to run every second
+//actions will take more than one second
+void loop() {
 
 	if (currentState == TURNED_OFF) {
 		game.turnOff();
@@ -83,14 +92,12 @@ void loop(){
 		game.turnOn();
 	}
 
-	else if (currentState == MOVE_TO_THEIR_MEM_PACK) {
-		stopAtFastest(opponentMemoryPackPos);
-		currentState = TAKING_THEIR_MEM_PACK;
+	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
+		stopAtFastest(ourMemoryPackPos);
 	}
 
-	else if (currentState == MOVE_TO_OUR_MEM_PACK) {
-		stopAtFastest(outMemoryPackPos);
-		currentState = TAKING_OUR_MEM_PACK;
+	else if (currentState == MOVE_TO_THEIR_MEM_PACK) {
+		stopAtFastest(opponentMemoryPackPos);
 	}
 
 	else if (currentState == TAKING_THEIR_MEM_PACK) {
@@ -102,8 +109,8 @@ void loop(){
 	}
 
 	else if (currentState == MOVING_TO_SHADOW) {
-		if (hasTimeToMoveToShadowZone()) {
-			moveToShadowZone()); 
+		if (game.getNextFlare() < 15) {
+			moveToShadowZone(); 
 		}
 	}
 
@@ -121,13 +128,13 @@ void loop(){
 
 	else if (currentState == TAKING_PIC) {
 
-		lookAtPOIFromOuter(); //TODO: write this method
+		lookAtPOIFromZone(OUTER_ZONE_ID); 
 
 		if (game.alignLine(0)) {
 			game.takePic(0);
 		} 
 
-		lookAtPOIFromInner(); ////TODO: write this method
+		lookAtPOIFromZone(INNER_ZONE_ID); 
 
 	}
 
@@ -138,9 +145,8 @@ void loop(){
 	}
 
 	if (currentState == OUT_OF_FUEL) {
-		if (game.getFuelRemaining() < 0.05) {
-			moveToShadowZone();1
-			currentState = TURNED_OFF;
-		}
+		//TODO: move to shadow
+		game.turnOff();
+		currentState = TURNED_OFF;
 	}
 }

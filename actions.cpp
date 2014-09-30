@@ -264,18 +264,47 @@ void spinForMemoryPack(float[3] memoryPackPos) {
     api.getMyZRState(ourState); 
     zRVel = ourState[11]; 
 
-    float[] currPos = {ourState[0], ourState[1], ourState[2]};
+    float currPos[] = {ourState[0], ourState[1], ourState[2]};
 
     float distToMemPack = dist(memoryPackPos, currPos);
 
         if (!(zRVel < 1.4f) && zRVel > 0.04f && distToMemPack < 0.05f){
-        float rVel[3] = {0f, 0f, 1f}; //in radians
-        api.setAttRateTarget(rVel);
+            float rVel[3] = {0f, 0f, 1f}; //in radians
+            api.setAttRateTarget(rVel);
         }
         else {    
-        setPositionTarget(memoryPackPos); 
-        float rVel[3] = {0f, 0f, 0f};
-        setAttRateTarget(rVel); 
+            setPositionTarget(memoryPackPos); 
+            float rVel[3] = {0f, 0f, 0f};
+            setAttRateTarget(rVel); 
         }
+    }
 }
+
+void lookAtPOIFromZone(int zoneID) {
+
+    //update this each time this gets called in loop
+    api.getMyZRState(ourState); 
+
+    float innerPos, outerPos; 
+
+    innerPos = ourState[1] > 0 ? 0.26f : -0.26f; 
+    outerPos = ourState[1] > 0 ? 0.425f : -0.425f; 
+
+    float xTargetPos; 
+    xTargetPos = zoneID == INNER_ZONE ? innerPos : outerPos; 
+
+    float lookingPosition[3]; 
+
+    lookingPosition[0] =  xTargetPos; 
+
+    //---no need to change these---//
+    lookingPosition[1] = ourState[1]; 
+    lookingPosition[2] = ourState[2]; 
+
+    api.setPositionTarget(lookingPosition); 
+
+    float noRotation = {0.0f, 0.0f, 0.0f}; 
+
+    api.setAttRateTarget(noRotation); 
+
 }
