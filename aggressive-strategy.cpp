@@ -6,10 +6,10 @@ float   travelledVector[3], halfwayVector[3], targetVector[3];
 float   currPos[3];
 float	ourState[12], othersState[12]; 
 float   zeroVelocity[3];
+float   shadowCenter[3];
 float	firstPOI[3], secondPOI[3];
 int 	opponentMemoryPack, ourMemoryPack; 
-bool	firstTime, areWeThereYet;
-
+bool	firstTime, areWeThereYet; 
 
 bool doneWithCurrTask; 
 
@@ -34,17 +34,21 @@ void init() {
 
 	doneWithCurrTask = false; 
 
-	TURNED_OFF = 0,
-	TURNED_ON = 1,
-	MOVE_TO_OUR_MEM_PACK = 2,
-	TAKING_OUR_MEM_PACK = 3,
-	MOVE_TO_THEIR_MEM_PACK = 4,
-	TAKING_THEIR_MEM_PACK = 5,
-	MOVING_TO_SHADOW = 6,
-	MOVING_TO_FIRST_POI = 7,
-	MOVING_TO_SECOND_POI = 8,
-	TAKING_PIC = 9,
-	UPLOAD_PIC = 10,
+    shadowCenter[0] = 0.32f;
+    shadowCenter[1] = 0.0f;
+    shadowCenter[2] = 0.0f;
+    
+	TURNED_OFF = 0;
+	TURNED_ON = 1;
+	MOVE_TO_OUR_MEM_PACK = 2;
+	TAKING_OUR_MEM_PACK = 3;
+	MOVE_TO_THEIR_MEM_PACK = 4;
+	TAKING_THEIR_MEM_PACK = 5;
+	MOVING_TO_SHADOW = 6;
+	MOVING_TO_FIRST_POI = 7;
+	MOVING_TO_SECOND_POI = 8;
+	TAKING_PIC = 9;
+	UPLOAD_PIC = 10;
 	OUT_OF_FUEL = 11;
 
     INNER_ZONE_ID = 0, 
@@ -52,7 +56,7 @@ void init() {
 
 	firstTime = true;
 	areWeThereYet = false;
-	
+
     for(int i = 0; i < 12; i++) {
         if(i < 3) {
             zeroVelocity[i] = 0.0f;
@@ -65,7 +69,7 @@ void init() {
 	api.getMyZRState(ourState); 
 	api.getOtherZRState(othersState); 
 
-	if (ourState[1] == 0.6f) {
+	if (ourState[1] > 0.0f) {
 		ourMemoryPack = 1;
 		opponentMemoryPack = 0; 
 	} else {
@@ -82,13 +86,14 @@ void init() {
 	} else {
 		ourMemoryPackPos[1] *= -1; 
 	}
+
 }
 
 void loop() {
 
 	if (game.getFuelRemaining() < .1) {
 		currentState = OUT_OF_FUEL; 
-	}
+	} 
 	if (doneWithCurrTask) {
 		currentState++; 
 		doneWithCurrTask = false; 
@@ -97,11 +102,11 @@ void loop() {
 	if (currentState == TURNED_OFF) {
 		game.turnOff();
 		
-		if (getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
+		if (game.getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
 				currentState = TURNED_ON;
 			}
 
-		if (getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
+		if (game.getFuelRemaining() > 0.0 && (game.getNextFlare() != -1)) {
 			currentState = TURNED_ON;
 		}
 	}
@@ -120,12 +125,12 @@ void loop() {
 	}
 
 	else if (currentState == TAKING_OUR_MEM_PACK) {
-		spinForMemoryPack();
+		spinForMemoryPack(ourMemoryPackPos);
 
 		if (game.hasMemoryPack(0, ourMemoryPack) || game.hasMemoryPack(1, ourMemoryPack)) //doesn't matter who has it, if its gone stop going for it
 			doneWithCurrTask = true; 
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
@@ -136,26 +141,26 @@ void loop() {
 		if (dist(opponentMemoryPackPos, currPos) < .1)
 			doneWithCurrTask = true;
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
 
 	else if (currentState == TAKING_THEIR_MEM_PACK) {
-		spinForMemoryPack();
+		spinForMemoryPack(opponentMemoryPackPos);
 
 		if (game.hasMemoryPack(0, opponentMemoryPack) || game.hasMemoryPack(1, opponentMemoryPack)) 
 			doneWithCurrTask = true; 
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
 
 	else if (currentState == TAKING_OUR_MEM_PACK) {
-		spinForMemoryPack();
+		spinForMemoryPack(ourMemoryPackPos);
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}	
 	}
@@ -163,34 +168,33 @@ void loop() {
 	else if (currentState == MOVING_TO_SHADOW) {
 		if (game.getNextFlare() < 15) {
 			moveToShadowZone(); 
-		if (game.getNextFlare == -1)
+		if (game.getNextFlare() == -1)
 			doneWithCurrTask = true; 
 		}
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
-	}
 	else if (currentState == MOVING_TO_FIRST_POI) {
-		firstPOI = game.getPOILoc(pos[3], 0);
-		stopAtFastest(firstPOI[3]);
+		game.getPOILoc(firstPOI, 0);
+		stopAtFastest(firstPOI);
 		currentState = TAKING_PIC;
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
 
 	else if (currentState == MOVING_TO_SECOND_POI) {
-		secondPOI = game.getPOILoc(pos[3], 1);
-		stopAtFastest(firstPOI[3]);
+		game.getPOILoc(secondPOI, 1);
+		stopAtFastest(firstPOI);
 		currentState = TAKING_PIC;
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 	}
@@ -205,7 +209,7 @@ void loop() {
 
 		lookAtPOIFromZone(INNER_ZONE_ID);
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			currentState = OUT_OF_FUEL;
 		}
 
@@ -222,9 +226,10 @@ void loop() {
 		if (game.getFuelRemaining() == 0) {
 			game.turnOff();
 
-		if (getFuelRemaining() < 0.01) {
+		if (game.getFuelRemaining() < 0.01) {
 			moveToShadowZone();
 			currentState = TURNED_OFF;
-		}
-	}
+	    	}
+    	}
+    }
 }

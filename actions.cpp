@@ -3,7 +3,7 @@
  * thrusters firing at full power the enitre trip. Stops the
  * satellite at the target.
 */
-void stopAtFastest(float target[3]) {
+void stopAtFastest(float target[]) {
     if(areWeThereYet) {
         api.setPositionTarget(target);
         return;
@@ -44,7 +44,6 @@ void stopAtFastest(float target[3]) {
         }
     }
     api.setForces(forces);
-    
 }
 
 /*
@@ -55,7 +54,7 @@ void stopAtFastest(float target[3]) {
  * equivalent to calling stopAtFastest() and 0 resulting in
  * no movement.
 */
-void stopAtVariable (float target[3], float power) {
+void stopAtVariable (float target[], float power) {
     if(areWeThereYet) {
         api.setPositionTarget(target);
         return;
@@ -102,15 +101,16 @@ void stopAtVariable (float target[3], float power) {
         }
     }
     api.setForces(forces);
-    
 }
+
 
 /*
  * Moves the satellite towards the provided target, with
  * thrusters firing at full power the entire trip. Makes
  * no attempt to stop at the target.
 */
-void moveTowardFastest(float target[3]) {
+
+void moveTowardFastest(float target[]) {
     if(areWeThereYet)
         return;
         
@@ -136,9 +136,7 @@ void moveTowardFastest(float target[3]) {
         }
     }
     api.setForces(forces);
-    
 }
-
 /*
  * Moves the satellite towards the provided target, with
  * thrusters firing only the percentage of the time 
@@ -176,44 +174,6 @@ void moveTowardVariable(float target[], float power) {
         }
     }
     api.setForces(forces);
-    
-}
-bool hasTimeToMoveToShadowZone() {
-    
-    int timeToNextSolarFlare = game.getNextFlare(); 
-    
-    if (timeToNextSolarFlare == -1)
-        return false; 
-    
-    if (game.getMemoryFilled() == 0)
-        return false; //should just turn off
-    
-    //make sure this is up to date
-    api.getMyZRState(ourState); 
-
-    float currPos[3];
-    currPos[0] = ourState[0];
-    currPos[1] = ourState[1];
-    currPos[2] = ourState[2];
-
-    /* Shadow zone positions: 
-     * X: 0.0 - 0.64
-     * Y: -0.2 - 0.2
-     * 
-     * Therefore, center at (0.32, 0.0)
-     * When going for shadow, aim there. 
-     */ 
-
-     if (currPos[0] >= 0.0f && currPos[1] <= -0.2f) {
-        //q3
-     } else if (currPos[0] >= 0.0f && currPos[1] >= 0.2f) {
-        //q4
-     } else {  //easy /Q1 or Q2
-        
-        float timeToGetToShadow = 2*ourState[1]/ourState[4]; 
-
-        return timeToGetToShadow + 3 > timeToNextSolarFlare; //3 second room for error
-     }
 }
 
 void moveToShadowZone() {
@@ -228,29 +188,22 @@ void moveToShadowZone() {
         waypoint[1] = -0.4f;
         waypoint[2] = 0.0f;  
 
-        float waypointArray[1][3];
-        waypointArray[0][0] = waypoint[0];
-        waypointArray[0][1] = waypoint[1];
-        waypointArray[0][2] = waypoint[2];
-        
-        moveToWaypoints(waypointArray, shadowCenter); 
+        moveToWaypoint(waypoint, shadowCenter); 
 
      } else if (ourState[0] >= 0.0f && ourState[1] >= 0.2f) {
 
-       float waypoint[] = {0.0f,0.4,0.0f}; 
-
-        float waypointArray[1][3];
-        waypointArray[0][0] = waypoint[0];
-        waypointArray[0][1] = waypoint[1];
-        waypointArray[0][2] = waypoint[2];
+       float waypoint[3];
+       waypoint[0] = 0.0f;
+       waypoint[1] = 0.4f; 
+       waypoint[2] = 0.0f; 
         
-        moveToWaypoints(waypointArray, shadowCenter); 
+       moveToWaypoint(waypoint, shadowCenter); 
      } else {  //easy /Q1 or Q2
-        moveToFastest(shadowCenter);
+        stopAtFastest(shadowCenter);
      }
 }
 
-void moveToWaypoints(float wayPoints[][3], float finalDest[]) {
+void moveToWaypoint(float wayPoint[], float finalDest[]) {
     //TODO david
 }
 
@@ -259,28 +212,33 @@ void moveToWaypoints(float wayPoints[][3], float finalDest[]) {
  * Rotate the satellite >90° along about the Z axis for 2D. 
  * Do not attempt to rotate faster than 80°/s
  */
-void spinForMemoryPack(float[3] memoryPackPos) {
+void spinForMemoryPack(float memoryPackPos[]) {
 
     api.getMyZRState(ourState); 
-    zRVel = ourState[11]; 
+    float zRVel = ourState[11]; 
 
     float currPos[3];
     currPos[0] = ourState[0];
     currPos[1] = ourState[1];
     currPos[2] = ourState[2];
-    
+  
     float distToMemPack = dist(memoryPackPos, currPos);
 
-        if (!(zRVel < 1.4f) && zRVel > 0.04f && distToMemPack < 0.05f){
-            float rVel[3] = {0f, 0f, 1f}; //in radians
-            api.setAttRateTarget(rVel);
+        if (zRVel < 1.4f && zRVel > 0.04f && distToMemPack < 0.05f) {
+            float rVel[3];
+            rVel[0] = 0.0f;
+            rVel[1] = 0.0f;
+            rVel[2] = 1.0f; //in radians
+            api.setAttRateTarget(rVel); 
         }
         else {    
-            setPositionTarget(memoryPackPos); 
-            float rVel[3] = {0f, 0f, 0f};
-            setAttRateTarget(rVel); 
+            api.setPositionTarget(memoryPackPos); 
+            float rVel[3];
+            rVel[0] = 0.0f;
+            rVel[1] = 0.0f;
+            rVel[2] = 0.0f;
+            api.setAttRateTarget(rVel);  
         }
-    }
 }
 
 void lookAtPOIFromZone(int zoneID) {
@@ -294,7 +252,7 @@ void lookAtPOIFromZone(int zoneID) {
     outerPos = ourState[1] > 0 ? 0.425f : -0.425f; 
 
     float xTargetPos; 
-    xTargetPos = zoneID == INNER_ZONE ? innerPos : outerPos; 
+    xTargetPos = zoneID == INNER_ZONE_ID ? innerPos : outerPos; 
 
     float lookingPosition[3]; 
 
@@ -314,3 +272,4 @@ void lookAtPOIFromZone(int zoneID) {
     api.setAttRateTarget(noRotation); 
 
 }
+
