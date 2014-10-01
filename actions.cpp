@@ -4,24 +4,20 @@
 * satellite at the target.
 */
 
-void stopAtFastest(float target[3])
-{
-    if(areWeThereYet)
-    {
+void stopAtFastest(float target[3]) {
+
+    if(areWeThereYet) {
         api.setPositionTarget(target);
         return;
     }
         
-    if(firstTime)               //IS IT THE FIRST TIME YOU CALLED THE FUNCTION?
-    {
-        for(int i = 0; i < 3; i++)  //if it is, sets initPos to the position and halfPos to the halfway point of the sphere
-        {
+    if(firstTime) {
+        for(int i = 0; i < 3; i++) { //if it is, sets initPos to the position and halfPos to the halfway point of the sphere
             initPos[i] = currPos[i];
             initVel[i] = currVel[i];
             halfPos[i] = (target[i] - currPos[i])/2 + currPos[i];
         }
             
-
         mathVecSubtract(targetVector, target, initPos, 3);  //subtracts initpos from the destination to get the vector from initpos to the destination
         mathVecSubtract(halfwayVector, halfPos, initPos, 3);//   ''       ''     ''  halfpos         ''  ''  ''   ''     ''   ''    '' halfpos
     
@@ -32,22 +28,16 @@ void stopAtFastest(float target[3])
         
         firstTime = false;
         
-    }
-    else    //DO THIS IF THIS IS *NOT* THE FIRST TIME YOU CALLED THE FUNCTION
-    {
+    } else { //not first time calling function
         mathVecSubtract(travelledVector, currPos, initPos, 3);    //subtracts initpos from current pos to get the vector from initpos to current pos
-        if(mathVecMagnitude(travelledVector, 3) >= mathVecMagnitude(halfwayVector, 3))
-        {
-            if(fabsf(mathVecMagnitude(travelledVector, 3) - mathVecMagnitude(targetVector, 3)) < 0.1f)
-            {
+        if(mathVecMagnitude(travelledVector, 3) >= mathVecMagnitude(halfwayVector, 3)) {
+            if(fabsf(mathVecMagnitude(travelledVector, 3) - mathVecMagnitude(targetVector, 3)) < 0.1f) {
                 api.setPositionTarget(target);
                 firstTime = true;
                 areWeThereYet = true;
                 
                 DEBUG(("%f", (float)api.getTime()));
-            }
-            else
-            {
+            } else {
                 for(int i = 0; i < 3; i++)
                     forces[i] = targetVector[i] * -1;
                 
@@ -56,7 +46,6 @@ void stopAtFastest(float target[3])
         }
     }
     api.setForces(forces);
-    
 }
 
 
