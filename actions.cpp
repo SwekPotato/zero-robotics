@@ -309,10 +309,6 @@ void moveToShadowZone() {
      }
 }
 
-void moveToWaypoint(float wayPoint[], float finalDest[]) {
-    //TODO david
-}
-
 /*
  * The satellite’s angular velocity must start at less than 2.3°/s.
  * Rotate the satellite >90° along about the Z axis for 2D. 
