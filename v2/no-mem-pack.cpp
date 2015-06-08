@@ -31,7 +31,7 @@ float    targetVector[3];        //the vector from initpos to the destination
 
 
 void init() {
-	target[0] = 0.3f;
+    target[0] = 0.3f;
     target[1] = 0.4f;
     target[2] = 0.3f;
     
@@ -65,7 +65,7 @@ void loop() {
 
     if (game.getNextFlare()< 6 && game.getNextFlare()!=-1) {
         if (game.getNextFlare()>=3) {
-            api.setPositionTarget(myPos);
+            stopAtFastest(myPos);
         } else if(game.getNextFlare() < 2 && game.getNextFlare()!=-1) {
             DEBUG(("POWERING OFF"));
             picCount =0;
@@ -77,15 +77,15 @@ void loop() {
         DEBUG(("WE ON"));
         isOff = false;
     } else if(picCount==0 && game.getNextFlare() == -1) {   //take pics of closest POI inner Zone
-	   takeOPic();
-	   //DEBUG(("Opic    "));
-	} else if(picCount==1 && (game.getNextFlare()==-1 || game.getNextFlare()>25)&&api.getTime()<220) {
-	   takeIPic();
-	   //DEBUG(("IPic    "));
-	} else if(picCount == 2 || (game.getNextFlare()<=27&& picCount==1)|| (api.getTime()<220&&picCount==1)) {
-	   uploadPics();
-	   //DEBUG(("Up   "));
-	}
+       takeOPic();
+       //DEBUG(("Opic    "));
+    } else if(picCount==1 && (game.getNextFlare()==-1 || game.getNextFlare()>20)&&api.getTime()<220) {
+       takeIPic();
+       //DEBUG(("IPic    "));
+    } else if(picCount == 2 || (game.getNextFlare()<=20&& picCount==1) || (api.getTime()<220&&picCount==1)) {
+       uploadPics();
+       //DEBUG(("Up   "));
+    }
 }
 
 
@@ -150,12 +150,12 @@ void getClosestPOILoc() {
 
 void uploadPics() {
     getSpot(uploadZone);
-	moveTo(spot[0], spot[1], spot[2]);
+    moveTo(spot[0], spot[1], spot[2]);
     if (nearEnough(myPos,spot, 0.04f)) {
         game.uploadPic();
         DEBUG(("Uploaded"));
         picCount=0;
-	}
+    }
 }
 
 void getSpot(float zone) {
