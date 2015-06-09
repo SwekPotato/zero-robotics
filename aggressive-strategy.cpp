@@ -122,9 +122,9 @@ void loop() {
 		//are we there yet? 
 		if (dist(ourMemoryPackPos, currPos) < .1)
 			doneWithCurrTask = true;
-	}
-
-	else if (currentState == TAKING_OUR_MEM_PACK) {
+        if (){
+        }
+	} else if (currentState == TAKING_OUR_MEM_PACK) {
 		spinForMemoryPack(ourMemoryPackPos);
 
 		if (game.hasMemoryPack(0, ourMemoryPack) || game.hasMemoryPack(1, ourMemoryPack)) //doesn't matter who has it, if its gone stop going for it
